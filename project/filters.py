@@ -1,5 +1,5 @@
 import django_filters
-from .models import Series , Movie
+from .models import Series, Movie
 
 
 class SeriesFilter(django_filters.FilterSet):
@@ -21,9 +21,7 @@ class SeriesFilter(django_filters.FilterSet):
 
 class MovieFilter(django_filters.FilterSet):
     movie_name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
-    genre = django_filters.CharFilter(
-        field_name="genre__name", lookup_expr="icontains"
-    )
+    genre = django_filters.CharFilter(field_name="genre__name", lookup_expr="icontains")
     released_after = django_filters.NumberFilter(
         field_name="release_year", lookup_expr="gte"
     )

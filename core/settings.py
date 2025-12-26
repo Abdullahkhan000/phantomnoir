@@ -133,5 +133,4 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
 TMDB_API_KEY = config("OMDB_API_KEY")
