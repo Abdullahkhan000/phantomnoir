@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>PhantomNoir | Premium Database</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #1a1c23; /* Image jaisa dark gray-ish blue background */
+        }
+        .glass-nav {
+            background: rgba(31, 41, 55, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .anime-card {
+            background: #252833;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .anime-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(168, 85, 247, 0.4);
+        }
+        .premium-gradient {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+        }
+        .search-bar {
+            background: #2d313d;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+
+<body class="text-gray-100 antialiased">
+
+<nav class="sticky top-0 z-50 glass-nav">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <h1 class="text-3xl font-extrabold tracking-tight">
+                Phantom<span class="text-purple-500">Noir</span>
+            </h1>
+            <div class="hidden md:block h-6 w-[1px] bg-gray-600 mx-2"></div>
+            <span class="hidden md:block text-gray-400 font-medium">Premium DataBase</span>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <div class="relative hidden sm:block">
+                <input type="text" placeholder="Search..." class="search-bar rounded-full py-2 px-6 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 w-64 text-gray-300">
+                <svg class="w-4 h-4 absolute right-4 top-2.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-purple-500/20 border-2 border-purple-500 flex items-center justify-center">
+                <span class="text-[10px] font-bold text-purple-400">User</span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 pt-16">
+
+    <header class="mb-16">
+        <h2 class="text-6xl font-extrabold tracking-tight mb-6">
+            Explore Series
+        </h2>
+        <p class="text-xl text-gray-400 max-w-2xl leading-relaxed">
+            Not all stories are meant to be comforting — descend into anime that fractures
+            the mind, blurs morality, and leaves scars long after the screen fades to black.
+        </p>
+    </header>
+
+
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        {% for series in series_list %}
+        <article class="anime-card group rounded-[2rem] overflow-hidden shadow-2xl">
+
+            <div class="relative aspect-[3/4] overflow-hidden">
+                <img
+                    src="{{ series.poster|default:'https://via.placeholder.com/400x600?text=No+Image' }}"
+                    alt="{{ series.name }}"
+                    class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                />
+
+                <a href="{% url 'anime-detail-ui' series.pk %}"
+                   class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center">
+                    <div class="w-16 h-16 rounded-full premium-gradient flex items-center justify-center shadow-2xl mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span class="text-sm font-bold uppercase tracking-widest">View Details</span>
+                </a>
+
+                <div class="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-lg text-[10px] font-black tracking-tighter border border-white/10">
+                    {{ series.release_year|default:"TBA" }}
+                </div>
+            </div>
+
+            <div class="p-6">
+                <h3 class="text-xl font-bold mb-3 truncate">{{ series.name }}</h3>
+
+                <div class="flex gap-2 mb-4">
+                    {% for g in series.genre.all|slice:":2" %}
+                    <span class="text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md bg-white/5 text-gray-400 border border-white/5">
+                        {{ g.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+
+                <p class="text-sm text-gray-500 line-clamp-2 mb-6">
+                    {{ series.about|default:"No description available." }}
+                </p>
+
+                <a href="{% url 'anime-detail-ui' series.pk %}"
+                   class="block w-full text-center py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] bg-gray-800 group-hover:premium-gradient transition-all duration-300">
+                    View Info
+                </a>
+            </div>
+
+        </article>
+        {% endfor %}
+    </section>
+
+    <div class="flex flex-col items-center mt-24 mb-32 gap-6">
+        <div class="flex items-center gap-2 p-1.5 bg-gray-800/50 rounded-full border border-white/5">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-700 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"></path></svg>
+            </a>
+            {% endif %}
+
+            <div class="px-6 py-2 bg-gray-700/50 rounded-full text-sm font-medium">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </div>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-700 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+</main>
+
+<footer class="py-12 border-t border-white/5 text-center text-xs text-gray-600 font-medium tracking-widest uppercase">
+    © 2025 Phantom Noir. Handcrafted by <span class="text-gray-400">Code2encoder</span>
+</footer>
+
+</body>
+</html>
