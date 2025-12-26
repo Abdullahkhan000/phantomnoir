@@ -133,11 +133,7 @@ class MovieSerializer(serializers.Serializer):
             "imdb_link": instance.imdb_link,
             "rt_link": instance.rt_link,
             "crunchyroll": instance.crunchyroll,
-            "series": (
-                {"name": instance.series.name}
-                if instance.series
-                else None
-            ),
+            "series": ({"name": instance.series.name} if instance.series else None),
             "genre": [{"name": g.name} for g in instance.genre.all()],
         }
 

@@ -5,9 +5,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
-from .models import Series , Movie
-from .serializers import SeriesSerializer , MovieSerializer
-from .filters import SeriesFilter , MovieFilter
+from .models import Series, Movie
+from .serializers import SeriesSerializer, MovieSerializer
+from .filters import SeriesFilter, MovieFilter
 
 
 class SeriesView(APIView):
@@ -83,32 +83,58 @@ class SeriesView(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Data patched successfully"},
+                status=status.HTTP_202_ACCEPTED,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk=None):
+        if not pk:
+            return Response(
+                {"error": "Primary key is required for PUT"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        obj = self.get_object(pk)
+
+        serializer = SeriesSerializer(obj, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Data patched successfully"},
+                status=status.HTTP_202_ACCEPTED,
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class MovieView(APIView):
-    searching_fields = ["movie_name","genre"]
+    searching_fields = ["movie_name", "genre"]
     ordering_fields = ["release_year"]
-    def get_object(self,pk=None):
+
+    def get_object(self, pk=None):
         try:
             return Movie.objects.get(pk)
         except Movie.DoesNotExist:
             return None
 
-    def get(self,request,pk=None):
+    def get(self, request, pk=None):
         if pk:
             obj = self.get_object(pk=pk)
             if not obj:
-                return Response({"error":"Object Data Not Found"},status=status.HTTP_404_NOT_FOUND)
+                return Response(
+                    {"error": "Object Data Not Found"}, status=status.HTTP_404_NOT_FOUND
+                )
             serializer = MovieSerializer(obj)
             return Response(serializer.data)
 
         queryset = Movie.objects.all()
-        filterset = MovieFilter(request.GET,queryset=queryset)
+        filterset = MovieFilter(request.GET, queryset=queryset)
 
         if not filterset.is_valid():
-            return Response(filterset.errors,status=status.HTTP_400_BAD_REQUEST)
+            return Response(filterset.errors, status=status.HTTP_400_BAD_REQUEST)
 
         queryset = filterset.qs
 
@@ -126,13 +152,16 @@ class MovieView(APIView):
 
         paginator = PageNumberPagination()
         paginator.page_size = 3
-        result_page = paginator.paginate_queryset(queryset,request)
+        result_page = paginator.paginate_queryset(queryset, request)
         serializer = MovieSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
-    def post(self,request,pk=None):
+    def post(self, request, pk=None):
         if pk:
-            return Response({"error":"POST Cannot Work In Primary Key"},status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "POST Cannot Work In Primary Key"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         many = isinstance(request.data, list)
         serializer = MovieSerializer(data=request.data, many=many)
@@ -141,6 +170,49 @@ class MovieView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk=None):
+        if pk is None:
+            return Response(
+                {"error": "PATCH Requires Primary Key"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        obj = self.get_object(pk)
+        if not obj:
+            return Response(
+                {"error": "Object DATA not Found"}, status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = MovieSerializer(obj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Data patched successfully"},
+                status=status.HTTP_202_ACCEPTED,
+            )
+        return Response(serializer.errors)
+
+    def put(self, request, pk=None):
+        if pk is None:
+            return Response(
+                {"error": "PUT Requires Primary Key"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        obj = self.get_object(pk)
+        if not obj:
+            return Response(
+                {"error": "Object DATA not Found"}, status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = MovieSerializer(obj, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Data patched successfully"},
+                status=status.HTTP_202_ACCEPTED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 def series_list_ui(request):
     series_queryset = Series.objects.all().order_by("-release_year")
@@ -173,6 +245,7 @@ def movie_list_ui(request):
         "movie_list": page_obj.object_list,
     }
     return render(request, "movie/movie_list.html", context)
+
 
 def movie_detail_ui(request, pk):
     movie = get_object_or_404(Movie, pk=pk)
