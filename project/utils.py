@@ -1,5 +1,7 @@
 import requests
 from django.conf import settings
+from rest_framework.response import Response
+from rest_framework import status
 
 TMDB_API_KEY = settings.TMDB_API_KEY
 JIKAN_BASE_URL = "https://api.jikan.moe/v4"
@@ -23,14 +25,12 @@ def fetch_jikan_anime(title):
         imdb_url = None
         crunchyroll_url = None
 
-        # 1. Check direct streaming field first
         for s in anime.get("streaming", []):
             if "crunchyroll" in s.get("name", "").lower():
                 crunchyroll_url = s.get("url")
                 print("Crunchyroll found in streaming list.")
                 break
 
-        # 2. Check External Links for IMDb and Crunchyroll
         ext_resp = requests.get(f"{JIKAN_BASE_URL}/anime/{mal_id}/external")
         if ext_resp.status_code == 200:
             external_links = ext_resp.json().get("data", [])
@@ -41,7 +41,6 @@ def fetch_jikan_anime(title):
                 elif "crunchyroll" in site and not crunchyroll_url:
                     crunchyroll_url = link.get("url")
 
-        # 3. FIX Release Year: if year is not null then take it from aired prop
         release_year = anime.get("year")
         if not release_year:
             aired = anime.get("aired", {}).get("prop", {}).get("from", {})
@@ -77,7 +76,6 @@ def fetch_tmdb_links(title, media_type="tv", year=None):
         resp = requests.get(search_url, params=params)
         data = resp.json()
 
-        # Fallback: Retry without year if no results
         if not data.get("results") and year:
             print("No TMDB results with year, retrying without year filter...")
             params.pop("first_air_date_year", None)
@@ -97,7 +95,6 @@ def fetch_tmdb_links(title, media_type="tv", year=None):
                 if imdb_id:
                     imdb_link = f"https://www.imdb.com/title/{imdb_id}"
 
-        # Manual Rotten Tomatoes Link Construction
         clean_title = title.replace(" ", "_").replace(":", "").replace("-", "_").lower()
         rt_type = "m" if media_type == "movie" else "tv"
         rt_link = f"https://www.rottentomatoes.com/{rt_type}/{clean_title}"
@@ -115,13 +112,11 @@ def populate_series_data(series_name):
 
     tmdb = fetch_tmdb_links(series_name, media_type="tv", year=jikan["release_year"])
 
-    # --- IMDb LOGIC ---
     final_imdb = jikan.get("imdb_link") or tmdb.get("imdb")
     if not final_imdb:
         print(f"IMDb still null for {series_name}, using Google Fallback.")
         final_imdb = f"https://www.imdb.com/find?q={series_name.replace(' ', '+')}"
 
-    # --- CRUNCHYROLL LOGIC ---
     final_crunchyroll = jikan.get("crunchyroll")
     if not final_crunchyroll:
         print(f"Crunchyroll null for {series_name}, using Search Fallback.")
@@ -166,3 +161,23 @@ def populate_movie_data(movie_name):
         "rt_link": tmdb["rt"],
         "crunchyroll": final_crunchyroll,
     }
+
+
+def get_obj_or_404(model, pk):
+    """
+    Generic reusable function to get object by PK or return proper Response.
+    :param model: Django model class
+    :param pk: primary key
+    :return: tuple (object or None, error Response or None)
+    """
+    if pk is None:
+        return None, Response(
+            {"error": "Primary key is required"}, status=status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        obj = model.objects.get(pk=pk)
+    except model.DoesNotExist:
+        return None, Response(
+            {"error": "Object not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+    return obj, None
