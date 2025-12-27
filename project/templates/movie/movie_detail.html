@@ -65,6 +65,40 @@ body{
   height: 2rem;
   color: white;
 }
+.platform-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.6rem;
+  padding:1rem;
+  border-radius:1.25rem;
+  font-weight:800;
+  letter-spacing:.08em;
+  font-size:.75rem;
+  transition:all .3s ease;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+}
+
+.platform-btn img,
+.platform-btn svg{
+  width: 40px;
+  height: 30px;
+}
+
+.platform-btn.tmdb img {
+  width: 80px;
+}
+
+.platform-btn.crunchyroll img {
+  width: 200px;
+}
+
+.platform-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 40px rgba(255,255,255,.15);
+}
+
 </style>
 </head>
 <body class="text-gray-200">
@@ -85,11 +119,9 @@ body{
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
-    <!-- Poster Section -->
     <div class="poster-card">
       <img src="{{ movie.poster|default:'https://via.placeholder.com/400x600?text=No+Image' }}" alt="{{ movie.movie_name }}">
 
-      <!-- Hover Overlay Eye Icon -->
       <a href="{% url 'movie-detail-ui' movie.pk %}" class="hover-overlay absolute inset-0">
         <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-2xl">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -104,9 +136,20 @@ body{
       </span>
     </div>
 
-    <!-- Info Section -->
     <div class="lg:col-span-2 flex flex-col gap-8">
       <h1 class="text-6xl font-extrabold">{{ movie.movie_name }}</h1>
+      {% if movie.series %}
+      <span class="inline-block w-max whitespace-nowrap text-[15px] uppercase font-black tracking-widest
+      bg-purple-500/10 text-purple-400 px-3 py-1 rounded-full border border-purple-500/20 mb-3">
+        Series · {{ movie.series.name }}
+      </span>
+      {% else %}
+      <span class="inline-block w-max whitespace-nowrap text-[15px] uppercase font-black tracking-widest
+      bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 mb-3">
+        Standalone
+      </span>
+      {% endif %}
+
       <div class="flex flex-wrap gap-2 mb-3">
         {% for g in movie.genre.all %}
         <span class="genre-badge">{{ g.name }}</span>
@@ -118,22 +161,50 @@ body{
         <p class="text-gray-300 leading-relaxed">{{ movie.about|default:"No description available." }}</p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-6">
+
         {% if movie.crunchyroll %}
-        <a href="{{ movie.crunchyroll }}" target="_blank" class="btn-action flex items-center justify-center gap-2 py-4 rounded-2xl text-sm bg-gray-800 hover:bg-gradient-to-br hover:from-purple-500 hover:to-indigo-600">
-          CRUNCHYROLL
+        <a href="{{ movie.crunchyroll }}" target="_blank"
+           class="platform-btn crunchyroll">
+
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Crunchyroll.svg/1280px-Crunchyroll.svg.png"
+               alt="Crunchyroll" class="h-8 w-28">
         </a>
         {% endif %}
+
         {% if movie.imdb_link %}
-        <a href="{{ movie.imdb_link }}" target="_blank" class="btn-action flex items-center justify-center gap-2 py-4 rounded-2xl text-sm bg-gray-800 hover:bg-gradient-to-br hover:from-yellow-500 hover:to-yellow-400">
+        <a href="{{ movie.imdb_link }}" target="_blank"
+           class="platform-btn imdb">
+
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg"
+               alt="IMDb">
+
           IMDb
         </a>
         {% endif %}
+
         {% if movie.rt_link %}
-        <a href="{{ movie.rt_link }}" target="_blank" class="btn-action flex items-center justify-center gap-2 py-4 rounded-2xl text-sm bg-gray-800 hover:bg-gradient-to-br hover:from-red-500 hover:to-red-400">
+        <a href="{{ movie.rt_link }}" target="_blank"
+           class="platform-btn rt">
+
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/5b/Rotten_Tomatoes.svg"
+               alt="Rotten Tomatoes">
+
           TOMATOMETER
         </a>
         {% endif %}
+
+        {% if movie.tmdb %}
+        <a href="{{ movie.tmdb }}" target="_blank"
+           class="platform-btn tmdb">
+
+          <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg"
+               alt="TMDB">
+
+          TMDB
+        </a>
+        {% endif %}
+
       </div>
 
     </div>

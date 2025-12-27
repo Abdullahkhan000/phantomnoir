@@ -137,7 +137,6 @@ class MovieView(APIView):
             return Response({"message": "Data patched successfully"}, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # PUT
     def put(self, request, pk=None):
         obj, error = get_obj_or_404(Movie, pk)
         if error:
@@ -148,7 +147,6 @@ class MovieView(APIView):
             return Response({"message": "Data updated successfully"}, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # DELETE
     def delete(self, request, pk=None):
         obj, error = get_obj_or_404(Movie, pk)
         if error:
