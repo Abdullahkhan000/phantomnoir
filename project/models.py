@@ -28,9 +28,14 @@ class Series(BaseModel):
     genre = models.ManyToManyField(Genre)
     release_year = models.IntegerField(null=True, blank=True)
     poster = models.URLField(null=True, blank=True)
+
+    # Info
     imdb_link = models.URLField(null=True, blank=True)
     rt_link = models.URLField(null=True, blank=True)
+
+    # Streaming (ONLY THESE 3)
     crunchyroll = models.URLField(null=True, blank=True)
+    tmdb = models.URLField(null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -39,6 +44,7 @@ class Series(BaseModel):
 class Movie(BaseModel):
     movie_name = models.CharField(max_length=255)
     about = models.TextField(blank=True)
+
     series = models.ForeignKey(
         Series,
         on_delete=models.SET_DEFAULT,
@@ -47,12 +53,17 @@ class Movie(BaseModel):
         null=True,
         blank=True,
     )
+
     genre = models.ManyToManyField(Genre, blank=True)
     release_year = models.IntegerField(null=True, blank=True)
     poster = models.URLField(null=True, blank=True)
-    imdb_link = models.URLField(null=True, blank=True)
-    rt_link = models.URLField(null=True, blank=True)
-    crunchyroll = models.URLField(null=True, blank=True)
 
+    # Info
+    imdb_link = models.URLField(null=True, blank=True)
+    tmdb = models.URLField(null=True, blank=True)
+    rt_link = models.URLField(null=True, blank=True)
+
+    # Streaming (ONLY THESE 3)
+    crunchyroll = models.URLField(null=True, blank=True)
     def __str__(self):
         return self.movie_name

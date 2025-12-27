@@ -29,6 +29,41 @@
             background: #363b49;
             border-color: rgba(168, 85, 247, 0.4);
         }
+        .platform-btn{
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              gap:.6rem;
+              padding:1rem;
+              border-radius:1.25rem;
+              font-weight:800;
+              letter-spacing:.08em;
+              font-size:.75rem;
+              transition:all .3s ease;
+              background:rgba(255,255,255,.05);
+              border:1px solid rgba(255,255,255,.1);
+        }
+
+        .platform-btn img,
+        .platform-btn svg{
+          width: 40px;
+          height: 30px;
+        }
+
+        .platform-btn.tmdb img {
+          width: 80px;
+        }
+
+        .platform-btn.crunchyroll img {
+          width: 200px;
+        }
+
+        .platform-btn:hover{
+          transform:translateY(-2px);
+          box-shadow:0 0 40px rgba(182, 48, 48, 0.63);
+        }
+
+
     </style>
 </head>
 <body class="text-gray-100 antialiased pb-20">
@@ -67,6 +102,7 @@
             </div>
 
             <div class="flex-1 space-y-10">
+
                 <section>
                     <h1 class="text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-none">
                         {{ series.name }}
@@ -87,31 +123,39 @@
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {% if series.crunchyroll %}
-                    <a href="{{ series.crunchyroll }}" target="_blank" class="btn-action flex items-center justify-center gap-3 py-5 rounded-2xl font-bold text-sm">
-                        <span class="text-orange-500">
-                             <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
-                        </span>
-                        CRUNCHYROLL
-                    </a>
-                    {% endif %}
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-6">
 
-                    {% if series.imdb_link %}
-                    <a href="{{ series.imdb_link }}" target="_blank" class="btn-action flex items-center justify-center gap-3 py-5 rounded-2xl font-bold text-sm">
-                        <span class="bg-yellow-500 text-black px-2 py-0.5 rounded text-[10px] font-black tracking-tighter">IMDb</span>
-                        VIEW RATING
-                    </a>
-                    {% endif %}
+                  {% if series.crunchyroll %}
+                  <a href="{{ series.crunchyroll }}" target="_blank" class="platform-btn crunchyroll">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Crunchyroll.svg/1280px-Crunchyroll.svg.png"
+                         alt="Crunchyroll" class="h-8 w-28">
+                  </a>
+                  {% endif %}
 
-                    {% if series.rt_link %}
-                    <a href="{{ series.rt_link }}" target="_blank" class="btn-action flex items-center justify-center gap-3 py-5 rounded-2xl font-bold text-sm">
-                        <span class="text-red-500">
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z"/></svg>
-                        </span>
-                        TOMATOMETER
-                    </a>
-                    {% endif %}
+                  {% if series.imdb_link %}
+                  <a href="{{ series.imdb_link }}" target="_blank" class="platform-btn imdb">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg"
+                         alt="IMDb">
+                    IMDb
+                  </a>
+                  {% endif %}
+
+                  {% if series.rt_link %}
+                  <a href="{{ series.rt_link }}" target="_blank" class="platform-btn rt">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5b/Rotten_Tomatoes.svg"
+                         alt="Rotten Tomatoes">
+                    TOMATOMETER
+                  </a>
+                  {% endif %}
+
+                  {% if series.tmdb %}
+                  <a href="{{ series.tmdb }}" target="_blank" class="platform-btn tmdb">
+                    <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg"
+                         alt="TMDB">
+                    TMDB
+                  </a>
+                  {% endif %}
+
                 </div>
 
                 <div class="flex gap-12 pt-8 border-t border-white/5">
@@ -124,13 +168,14 @@
                         <p class="text-gray-300 font-bold tracking-tight italic">PhantomNoir DB</p>
                     </div>
                 </div>
+
             </div>
         </div>
     </main>
 
-<footer class="py-10 border-t border-white/5 text-center text-xs text-gray-600 font-medium tracking-widest uppercase">
-    © 2025 Phantom Noir. Handcrafted by <span class="text-gray-400">Code2encoder</span>
-</footer>
+    <footer class="py-10 border-t border-white/5 text-center text-xs text-gray-600 font-medium tracking-widest uppercase">
+        © 2025 Phantom Noir. Handcrafted by <span class="text-gray-400">Code2encoder</span>
+    </footer>
 
 </body>
 </html>

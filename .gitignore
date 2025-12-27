@@ -5,6 +5,7 @@ db.sqlite3
 .venv
 static
 .env
+test.py
 /staticfiles/
 node_modules/
 .DS_Store
