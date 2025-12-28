@@ -29,11 +29,9 @@ class Series(BaseModel):
     release_year = models.IntegerField(null=True, blank=True)
     poster = models.URLField(null=True, blank=True)
 
-    # Info
     imdb_link = models.URLField(null=True, blank=True)
     rt_link = models.URLField(null=True, blank=True)
 
-    # Streaming (ONLY THESE 3)
     crunchyroll = models.URLField(null=True, blank=True)
     tmdb = models.URLField(null=True, blank=True)
 
@@ -58,12 +56,10 @@ class Movie(BaseModel):
     release_year = models.IntegerField(null=True, blank=True)
     poster = models.URLField(null=True, blank=True)
 
-    # Info
     imdb_link = models.URLField(null=True, blank=True)
     tmdb = models.URLField(null=True, blank=True)
     rt_link = models.URLField(null=True, blank=True)
 
-    # Streaming (ONLY THESE 3)
     crunchyroll = models.URLField(null=True, blank=True)
     def __str__(self):
         return self.movie_name

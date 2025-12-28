@@ -28,7 +28,8 @@ class MovieFilter(django_filters.FilterSet):
     released_before = django_filters.NumberFilter(
         field_name="release_year", lookup_expr="lte"
     )
+    series = django_filters.CharFilter(field_name="series__name",lookup_expr="icontains")
 
     class Meta:
         model = Movie
-        fields = ["movie_name", "genre", "released_after", "released_before"]
+        fields = ["movie_name", "genre", "released_after", "released_before", "series"]
