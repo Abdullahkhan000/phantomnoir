@@ -109,30 +109,33 @@ class MovieSerializer(serializers.Serializer):
     def create(self, validated_data):
         user_genres = validated_data.pop("genre", None)
         series_obj = validated_data.pop("series", None)
-        movie_name = validated_data.get("movie_name")
-
-        fetched = populate_movie_data(movie_name)
-        if fetched:
-            fetched_genres = fetched.pop("genre", [])
-            for key, value in fetched.items():
-                if value:
-                    validated_data.setdefault(key, value)
-        else:
-            fetched_genres = []
-
-        if not validated_data.get("release_year"):
-            validated_data["release_year"] = 0
 
         movie = Movie.objects.create(series=series_obj, **validated_data)
 
-        all_genres = user_genres if user_genres is not None else fetched_genres
+        fetched = populate_movie_data(movie)
+
+        fetched_genres = []
+        if fetched:
+            fetched_genres = fetched.pop("genre", [])
+            for key, value in fetched.items():
+                if value and not getattr(movie, key):
+                    setattr(movie, key, value)
+
+        if not movie.release_year:
+            movie.release_year = 0
+
+        movie.save()
+
+        all_genres = user_genres if user_genres not in (None, []) else fetched_genres
+
         genre_objs = []
         for g in all_genres or []:
             name = g.get("name") if isinstance(g, dict) else g
             if name:
-                obj, _ = Genre.objects.get_or_create(name=name)
+                obj, _ = Genre.objects.get_or_create(name=name.strip())
                 genre_objs.append(obj)
 
         if genre_objs:
             movie.genre.set(genre_objs)
+
         return movie

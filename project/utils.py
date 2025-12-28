@@ -11,6 +11,19 @@ TMDB_BASE_URL = "https://api.themoviedb.org/3"
 OMDB_API_KEY = settings.OMDB_API_KEY
 TMDB_API_KEY = settings.TMDB_API_KEY
 
+def auto_detect_series(movie_title: str):
+    series_list = Series.objects.all()
+
+    title_lower = movie_title.lower()
+
+    for series in series_list:
+        series_name = series.name.lower()
+        if series_name in title_lower:
+            return series
+
+    return None
+
+
 def fetch_jikan_anime(title):
     url = f"{JIKAN_BASE_URL}/anime"
     params = {"q": title, "limit": 1}
@@ -129,41 +142,63 @@ def populate_series_data(series_input: Union[Series, str]):
     }
 
 def populate_movie_data(movie_input: Union[Movie, str]):
-    movie_obj = None
-    name = movie_input.movie_name if isinstance(movie_input, Movie) else movie_input
-
     if isinstance(movie_input, Movie):
         movie_obj = movie_input
+        name = movie_obj.movie_name
     else:
-        movie_obj = Movie.objects.filter(movie_name=name).first()
+        movie_obj = Movie.objects.filter(movie_name=movie_input).first()
+        name = movie_input
+
+    if not movie_obj:
+        return {}
 
     jikan = fetch_jikan_anime(name)
     streaming = fetch_tmdb_streaming(name, media_type="movie")
 
-    imdb = movie_obj.imdb_link if movie_obj and movie_obj.imdb_link else fetch_omdb_imdb_link(name)
-    rt = movie_obj.rt_link if movie_obj and movie_obj.rt_link else generate_rt_link(name, "movie")
+    detected_series = None
+    title_lower = name.lower()
 
-    crunchyroll_link = jikan.get("crunchyroll") if jikan else None
+    for series in Series.objects.all():
+        if series.name.lower() in title_lower:
+            detected_series = series
+            break
+
+    imdb = movie_obj.imdb_link or fetch_omdb_imdb_link(name)
+    rt = movie_obj.rt_link or generate_rt_link(name, "movie")
+
+    crunchyroll_link = None
+    if jikan:
+        crunchyroll_link = jikan.get("crunchyroll")
+
     if not crunchyroll_link:
         crunchyroll_link = f"https://www.crunchyroll.com/search?q={name.replace(' ', '+')}"
 
-    if movie_obj:
-        movie_obj.imdb_link = imdb
-        movie_obj.rt_link = rt
-        movie_obj.tmdb = streaming["tmdb"]
-        movie_obj.crunchyroll = crunchyroll_link
-        movie_obj.save()
+    if jikan:
+        movie_obj.about = jikan.get("about")
+        movie_obj.poster = jikan.get("poster")
+        movie_obj.release_year = jikan.get("release_year")
+
+    movie_obj.imdb_link = imdb
+    movie_obj.rt_link = rt
+    movie_obj.tmdb = streaming.get("tmdb")
+    movie_obj.crunchyroll = crunchyroll_link
+
+    if movie_obj.series is None and detected_series:
+        movie_obj.series = detected_series
+
+    movie_obj.save()
 
     return {
         "about": movie_obj.about if movie_obj else (jikan.get("about") if jikan else ""),
         "poster": movie_obj.poster if movie_obj else (jikan.get("poster") if jikan else None),
         "release_year": movie_obj.release_year if movie_obj else (jikan.get("release_year") if jikan else None),
-        "genre": [g.name for g in movie_obj.genre.all()] if movie_obj else (jikan.get("genre") if jikan else []),
+        "genre": jikan.get("genre", []) if jikan else [],
         "imdb_link": imdb,
         "rt_link": rt,
         "crunchyroll": crunchyroll_link,
         **streaming,
     }
+
 
 def get_obj_or_404(model, pk):
     if not pk:
